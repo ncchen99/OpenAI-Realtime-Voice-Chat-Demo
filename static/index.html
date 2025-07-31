@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎤 OpenAI Realtime Voice Chat</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Markdown 支持 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🎤 OpenAI Realtime Voice Chat</h1>
+        </header>
+
+        <main class="main-content">
+            <!-- 分頁導航 -->
+            <div class="tab-navigation">
+                <button class="tab-button active" onclick="switchTab('voice')">
+                    🎤 語音對談
+                </button>
+                <button class="tab-button" onclick="switchTab('text')">
+                    💬 文字聊天
+                </button>
+            </div>
+
+            <!-- 語音對談模式 -->
+            <div id="voice-tab" class="tab-content active">
+                <div class="chat-container" id="voice-messages">
+                    <div class="welcome-message">
+                        <div class="bot-avatar">🤖</div>
+                        <div class="message-content">
+                            <p>您好！我是您的語音助手，點擊下方的通話按鈕開始對話吧！</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button id="call-btn" class="call-button" onclick="toggleCall()">
+                        <span class="call-icon">📞</span>
+                        <span class="call-text">開始通話</span>
+                    </button>
+                    <button id="clear-voice-btn" class="clear-button" onclick="clearChat('voice')">
+                        🗑️ 清除
+                    </button>
+                </div>
+
+                <div class="audio-controls">
+                    <div class="volume-control">
+                        <label>🔊 音量：</label>
+                        <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.8">
+                        <span id="volume-value">80%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文字聊天模式 -->
+            <div id="text-tab" class="tab-content">
+                <div class="chat-container" id="text-messages">
+                    <div class="welcome-message">
+                        <div class="bot-avatar">🤖</div>
+                        <div class="message-content">
+                            <p>您好！我是您的文字助手，請在下方輸入您的問題。支援 <strong>Markdown</strong> 格式顯示！</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button id="connect-text-btn" class="primary-button" onclick="connectTextMode()">
+                        🔗 連接文字模式
+                    </button>
+                    <button id="clear-text-btn" class="clear-button" onclick="clearChat('text')">
+                        🗑️ 清除
+                    </button>
+                </div>
+
+                <div class="text-input-section">
+                    <div class="input-group">
+                        <textarea id="text-input" placeholder="輸入您的訊息...支援 Markdown 格式"
+                            onkeypress="handleTextKeyPress(event)" rows="3"></textarea>
+                        <button class="send-button" onclick="sendTextMessage()">發送</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 右下角狀態欄 -->
+        <div id="status-bar" class="status-bar">
+            <div id="status" class="status disconnected">未連接</div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
