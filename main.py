@@ -63,9 +63,10 @@ async def websocket_realtime_voice(websocket: WebSocket):
                 },
                 "turn_detection": {
                     "type": "server_vad",
-                    "threshold": 0.6,          # 提高靈敏度
-                    "prefix_padding_ms": 200,   # 減少前置延遲
-                    "silence_duration_ms": 150  # 減少靜音檢測時間
+                    "threshold": 0.5,          # 提高靈敏度
+                    "prefix_padding_ms": 300,   # 增加前置延遲確保完整語音
+                    "silence_duration_ms": 200,  # 適度的靜音檢測時間
+                    "create_response": False    # 禁用自動創建回應，由客戶端控制
                 },
                 "temperature": 0.7,  # 稍微降低溫度以提高響應速度
                 "max_response_output_tokens": 2048,  # 限制回應長度以加快速度

@@ -203,6 +203,15 @@ async function handleRealtimeMessage(data) {
             console.log('語音轉錄完成:', data.transcript);
             if (data.transcript && data.transcript.trim()) {
                 addMessage('user', data.transcript, 'voice');
+                updateStatus('🤔 正在思考...', 'connecting');
+
+                // 轉錄完成後手動創建AI回應，確保順序正確
+                if (realtimeWs && realtimeWs.readyState === WebSocket.OPEN) {
+                    realtimeWs.send(JSON.stringify({
+                        type: 'response.create'
+                    }));
+                    console.log('轉錄完成，手動創建回應');
+                }
             }
             break;
 
@@ -238,16 +247,13 @@ async function handleRealtimeMessage(data) {
 
         case 'input_audio_buffer.speech_stopped':
             console.log('檢測到語音結束，提交音頻緩衝區');
-            updateStatus('🤔 正在思考...', 'connecting');
+            updateStatus('🤔 正在轉錄...', 'connecting');
             // 提交音頻緩衝區以觸發轉錄
             if (realtimeWs && realtimeWs.readyState === WebSocket.OPEN) {
                 realtimeWs.send(JSON.stringify({
                     type: 'input_audio_buffer.commit'
                 }));
                 console.log('已發送 input_audio_buffer.commit');
-
-                // 不要立即創建回應，等待轉錄完成
-                // response.create 將在轉錄完成後自動觸發（使用 server VAD）
             }
             break;
 
@@ -427,11 +433,42 @@ function sendTextMessage() {
         }
     } else {
         // 文字模式
-        if (!message || !isTextConnected) {
-            if (!isTextConnected) {
-                alert('請先點擊「連接文字模式」按鈕');
-                return;
-            }
+        if (!message) return;
+
+        // 如果尚未連接文字模式，自動連接
+        if (!isTextConnected) {
+            addMessage('user', message, 'text');
+            // 暫存訊息，等連接完成後發送
+            const pendingMessage = message;
+
+            connectTextMode().then(() => {
+                // 連接成功後發送訊息
+                if (textWs && textWs.readyState === WebSocket.OPEN) {
+                    textWs.send(JSON.stringify({
+                        type: 'conversation.item.create',
+                        item: {
+                            type: 'message',
+                            role: 'user',
+                            content: [{
+                                type: 'input_text',
+                                text: pendingMessage
+                            }]
+                        }
+                    }));
+
+                    textWs.send(JSON.stringify({
+                        type: 'response.create',
+                        response: {
+                            modalities: ["text"],
+                            instructions: "請用繁體中文回應，並可以使用 Markdown 格式來美化回應內容。"
+                        }
+                    }));
+                }
+            }).catch(error => {
+                console.error('自動連接文字模式失敗:', error);
+                updateStatus('文字模式連接失敗', 'disconnected');
+            });
+
             return;
         }
 
