@@ -201,7 +201,14 @@ async function handleRealtimeMessage(data) {
 
         case 'conversation.item.input_audio_transcription.completed':
             console.log('語音轉錄完成:', data.transcript);
-            addMessage('user', data.transcript, 'voice');
+            if (data.transcript && data.transcript.trim()) {
+                addMessage('user', data.transcript, 'voice');
+            }
+            break;
+
+        case 'conversation.item.input_audio_transcription.delta':
+            console.log('語音轉錄 delta:', data.delta);
+            // 根據 OpenAI 社群討論，delta 通常只在語音結束後才發送
             break;
 
         case 'response.created':
@@ -239,13 +246,13 @@ async function handleRealtimeMessage(data) {
                 }));
                 console.log('已發送 input_audio_buffer.commit');
 
-                // 創建對話項目並請求回應
-                realtimeWs.send(JSON.stringify({
-                    type: 'response.create'
-                }));
-                console.log('已發送 response.create');
-                hasActiveResponse = true;
+                // 不要立即創建回應，等待轉錄完成
+                // response.create 將在轉錄完成後自動觸發（使用 server VAD）
             }
+            break;
+
+        case 'input_audio_buffer.committed':
+            console.log('音頻緩衝區已提交');
             break;
 
         case 'error':
