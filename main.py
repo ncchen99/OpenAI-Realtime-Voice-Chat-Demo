@@ -70,7 +70,12 @@ async def websocket_realtime_voice(websocket: WebSocket):
                 },
                 "temperature": 0.7,  # 稍微降低溫度以提高響應速度
                 "max_response_output_tokens": 2048,  # 限制回應長度以加快速度
-                "tools": [],
+                "tools": [
+                    {
+                        "type": "file_search",
+                        "vector_store_ids": "vs_688c41757adc8191bca3bd4c47fa5405"
+                    }
+                ],
                 "tool_choice": "none"
             }
         }
